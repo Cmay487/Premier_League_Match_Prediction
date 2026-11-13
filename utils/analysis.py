@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 from utils.df_adjustments import add_matrix_colour
 from scipy.stats import chi2_contingency
+import matplotlib.pyplot as plt
+import seaborn as sns
+from utils.plotting import viz_the_validation
 
 def calculate_win_pct(df: pd.DataFrame,team: str) -> pd.DataFrame:
   df = df.copy()
@@ -109,3 +112,59 @@ def goals_for_and_against_match_avg(df:pd.DataFrame, team:str, sortby:str) -> pd
   )
 
   return goals_for_and_against
+
+def run_cross_validation(X_train_in, y_train_in, models, cv=5, scoring=None):
+    """
+
+    1. always resorts to accuracy if there is no scoring inputted
+    2. The standard crossvalidation is applied. We do not have too heavy class imabalance so cross_validate()
+       was appropriate and no stratification was selected.
+    3. Create a new df that allows for the visualisation of mt results over fold.
+    4. Visualise each result over the selected scoring.
+
+    """
+    if scoring is None:
+        scoring = ['accuracy']
+
+    results = []
+    plot_data = []  # separate list for per-fold plot data
+
+    # create timeseries crossvalisation
+    tcsv = TimeSeriesSplit(n_splits=5)
+
+    # create list to save results
+    results = []
+
+    for fold, (train_idx, val_idx) in enumerate(tcsv.split(X_train_in), start=1):
+      # spplit the data by time chunks
+      X_train_,X_val_ = X_train_in.iloc[train_idx],X_train_in.iloc[val_idx]
+      y_train_,y_val_ = y_train_in[train_idx],y_train_in[val_idx]
+
+      # loop through the models to make their predictions
+      for model_name,model in models.items():
+        model.fit(X_train_,y_train_)
+        y_pred = model.predict(X_val_)
+
+        #get f1
+        f1_out = f1_score(y_val_,y_pred,average='macro')
+        prec = precision_score(y_val_,y_pred,average='macro')
+        recall = recall_score(y_val_,y_pred,average='macro')
+        accuracy = accuracy_score(y_val_,y_pred)
+
+
+        # save predictions and actuals as rows
+        results.append({
+                    "Fold": fold,
+                    "Model": model_name,
+                    "F1": f1_out,
+                    "Accuracy": accuracy,
+                    "Precision": prec,
+                    "Recall": recall
+                })
+    # save to df
+    results = pd.DataFrame(results)
+
+    # show results in viz
+    viz_the_validation(results)
+
+

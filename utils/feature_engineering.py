@@ -188,31 +188,33 @@ def adjust_season(season_str):
     return start_str + end_str
 
 def team_status(df:pd.DataFrame) -> pd.DataFrame:
-  df = df.copy()
-
+  
+  df_copy = df.copy()
+  
+  
   # create a dict containing each team by season
-  season_team_map = df.groupby("Season")["HomeTeam"].apply(set).to_dict()
-  season_away_team_map = df.groupby("Season")["AwayTeam"].apply(set).to_dict()
+  season_team_map = df_copy.groupby("Season")["HomeTeam"].apply(set).to_dict()
+  season_away_team_map = df_copy.groupby("Season")["AwayTeam"].apply(set).to_dict()
 
   # helper col
-  df["PreviousSeason"] = df["Season"].apply(adjust_season)
+  df_copy["PreviousSeason"] = df_copy["Season"].apply(adjust_season)
 
   # create the features
-  df["HomeTeamLeagueStatus"] = df.apply(
+  df_copy["HomeTeamLeagueStatus"] = df_copy.apply(
       lambda row: "Newly Promoted"
                   if row['Season'] != '1819' and row["HomeTeam"] not in season_team_map.get(row["PreviousSeason"] , set())
                   else "Established",
       axis=1
   )
 
-  df["AwayTeamLeagueStatus"] = df.apply(
+  df_copy["AwayTeamLeagueStatus"] = df_copy.apply(
       lambda row: "Newly Promoted"
-                  if  row['Season'] != '1819' and row["AwayTeam"] not in season_team_map.get(row["PreviousSeason"] , set())
+                  if  row['Season'] != '1819' and row["AwayTeam"] not in season_away_team_map.get(row["PreviousSeason"] , set())
                   else "Established",
       axis=1
   )
 
   # drop helper col
-  df.drop(columns=['PreviousSeason'],inplace=True)
+  df_copy.drop(columns=['PreviousSeason'],inplace=True)
 
-  return df
+  return df_copy

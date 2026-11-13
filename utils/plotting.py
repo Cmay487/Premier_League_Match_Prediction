@@ -105,3 +105,52 @@ def show_the_relartionship(df,**kwargs):
       x_label=x_label_,
       y_label=y_label_
   )
+
+def viz_the_validation(results:pd.DataFrame):
+  """
+  Here I will show the results of the cross validation over each fold
+
+  """
+
+  fig, axes = plt.subplots(
+      len(results.columns)-1,1,figsize=(12,4 * len(results.columns))
+  )
+
+
+  if len(results) == 1:
+      axes = [axes]  # ensure iterable when only 1 metric
+  scoring = results.columns[2:]
+  for ax, metric in zip(axes, scoring):
+        sns.lineplot(
+            data=results,
+            x='Fold',
+            y=metric,
+            hue='Model',
+            marker='o',
+            ax=ax
+        )
+        ax.set_title(
+            f'{metric} across folds',
+            fontsize=14,
+            fontweight='bold',
+            color='grey'
+        )
+        ax.set_xlabel('Fold')
+        ax.set_ylabel(metric)
+        ax.legend(title='Model')
+        ax.grid(
+            linestyle='--',
+            alpha=0.5
+        )
+
+  # add overview title
+  plt.suptitle(
+      "Cross Validation Results",
+       fontsize=20,
+       fontweight='bold',
+       color='grey',
+       x=0.5,
+       ha='center',
+       y=1.01  # lifts it above the subplots
+    )
+  plt.tight_layout()

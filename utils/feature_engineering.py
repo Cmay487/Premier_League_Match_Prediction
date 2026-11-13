@@ -169,3 +169,50 @@ def rolling_win_pct(df:pd.DataFrame, team:str) -> pd.DataFrame:
   df.drop(columns=['HomeWin','AwayWin','Draw'],inplace=True)
 
   return df
+
+
+def adjust_season(season_str):
+    # convert to int for easier reduction
+    start_num = int(season_str[:2])
+    end_num = int(season_str[2:])
+
+    # subtract one year
+    start_num -= 1
+    end_num -= 1
+
+    # convert back to 2-digit strings with leading zeros
+    start_str = str(start_num).zfill(2)
+    end_str = str(end_num).zfill(2)
+
+    # combine into season string
+    return start_str + end_str
+
+def team_status(df:pd.DataFrame) -> pd.DataFrame:
+  df = df.copy()
+
+  # create a dict containing each team by season
+  season_team_map = df.groupby("Season")["HomeTeam"].apply(set).to_dict()
+  season_away_team_map = df.groupby("Season")["AwayTeam"].apply(set).to_dict()
+
+  # helper col
+  df["PreviousSeason"] = df["Season"].apply(adjust_season)
+
+  # create the features
+  df["HomeTeamLeagueStatus"] = df.apply(
+      lambda row: "Newly Promoted"
+                  if row['Season'] != '1819' and row["HomeTeam"] not in season_team_map.get(row["PreviousSeason"] , set())
+                  else "Established",
+      axis=1
+  )
+
+  df["AwayTeamLeagueStatus"] = df.apply(
+      lambda row: "Newly Promoted"
+                  if  row['Season'] != '1819' and row["AwayTeam"] not in season_team_map.get(row["PreviousSeason"] , set())
+                  else "Established",
+      axis=1
+  )
+
+  # drop helper col
+  df.drop(columns=['PreviousSeason'],inplace=True)
+
+  return df

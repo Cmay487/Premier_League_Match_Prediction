@@ -1,11 +1,17 @@
+
+# data analysis
 import pandas as pd
 import numpy as np
 from scipy.stats import (
-    binom, beta, poisson, expon, geom, nbinom,
-    chi2_contingency
+    binom, beta, geom
 )
 
+# funcs
+from utils.plotting import adjust_visuals
+
+# visuals
 import seaborn as sns
+import matplotlib.pyplot as plt
 
 class ProbabilityModelling:
   def __init__(self, df: pd.DataFrame,  outcome: str, n_trials: int = 19):

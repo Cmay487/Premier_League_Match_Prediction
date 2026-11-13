@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-
+import seaborn as sns
 
 
 # create a function that adjust visual axis
@@ -104,4 +104,4 @@ def show_the_relartionship(df,**kwargs):
       title=title,
       x_label=x_label_,
       y_label=y_label_
-  );
+  )

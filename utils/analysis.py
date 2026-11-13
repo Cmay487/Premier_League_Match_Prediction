@@ -12,7 +12,7 @@ def calculate_win_pct(df: pd.DataFrame,team: str) -> pd.DataFrame:
     df.pivot_table(
     index=team,
     columns='FT_Result',
-    values='League Division',
+    values='Season',
     aggfunc='count'
   )
   .sort_values(by=sort_by_arg,ascending=False)
@@ -92,3 +92,20 @@ def run_chi2_test(**kwargs):
 
 
   return tbl
+
+
+def goals_for_and_against_match_avg(df:pd.DataFrame, team:str, sortby:str) -> pd.DataFrame:
+  #df = df.copy()
+
+  # group by selected team
+  grp = df.groupby(team)
+
+  # agg the data
+  goals_for_and_against = (
+    grp[['FT_HomeGoals','FT_AwayGoals']]
+    .mean()
+    .reset_index()
+    .sort_values(by=sortby,ascending=False)
+  )
+
+  return goals_for_and_against

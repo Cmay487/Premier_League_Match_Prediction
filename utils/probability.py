@@ -5,6 +5,8 @@ from scipy.stats import (
     chi2_contingency
 )
 
+import seaborn as sns
+
 class ProbabilityModelling:
   def __init__(self, df: pd.DataFrame,  outcome: str, n_trials: int = 19):
     self.df = df

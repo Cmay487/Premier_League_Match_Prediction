@@ -68,3 +68,40 @@ def adjust_visual_obj(ax_obj,title,x_label,y_label,title_params,axis_params):
         linestyle='--',
         alpha=0.25
     )
+
+
+def show_the_relartionship(df,**kwargs):
+
+  #extract argss
+  var1 = kwargs.get('var1')
+  var2 = kwargs.get('var2')
+  result = kwargs.get('result')
+  plot_kind = kwargs.get('kind')
+  title = kwargs.get('title')
+  x_label_ = kwargs.get('x_label')
+  y_label_ = kwargs.get('y_label')
+
+  # show the distribution and relationships
+  corr_tb = df[[var1,var2]].corr()
+  corr_tb = corr_tb.round(2)
+  print(f"Goals For & Against Correlation: \n\n {corr_tb}\n\n")
+
+  plt.figure(
+      figsize=(10,8)
+  );
+
+  sns.jointplot(
+      data=df,
+      x=var1,
+      y=var2,
+      hue=result,
+      kind=plot_kind
+    );
+
+
+  # format the plot
+  adjust_visuals(
+      title=title,
+      x_label=x_label_,
+      y_label=y_label_
+  );
